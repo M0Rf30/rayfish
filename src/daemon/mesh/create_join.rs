@@ -2129,6 +2129,16 @@ mod tests {
             "lan-1"
         );
         assert_eq!(registry.name_owner("office").unwrap(), NameOwner::Free);
+        // A name at the length limit leaves no room for a suffix: the candidate
+        // is cut short to stay a valid name rather than failing the lookup.
+        let longest = "a".repeat(63);
+        save_inactive_network(&longest, &SecretKey::generate());
+        assert_eq!(
+            registry
+                .unclaimed_network_name(&longest, Some(fresh))
+                .unwrap(),
+            format!("{}-1", "a".repeat(61))
+        );
         daemon.shutdown_and_close().await;
     }
 }

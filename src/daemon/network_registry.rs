@@ -55,6 +55,19 @@ pub(crate) enum NameOwner {
     Unknown,
 }
 
+/// `base` with `-{suffix}` appended, cut short so the result is still a valid
+/// name (`hostname::is_valid_hostname`): at most 63 characters, and no hyphen left
+/// at the cut to run into the suffix's own.
+fn suffixed_name(base: &str, suffix: u32) -> String {
+    const MAX_LEN: usize = 63;
+    let tail = format!("-{suffix}");
+    let stem: String = base
+        .chars()
+        .take(MAX_LEN.saturating_sub(tail.len()))
+        .collect();
+    format!("{}{tail}", stem.trim_end_matches('-'))
+}
+
 /// One network to (re)handshake when dialing a peer: its name and the per-network
 /// public key that signs the `MeshHello`. A peer's single connection carries every
 /// shared network, so a dial takes a slice of these.
@@ -844,7 +857,7 @@ impl NetworkRegistry {
                 NameOwner::Free => return Ok(candidate),
                 NameOwner::Network(owner) if Some(owner) == key => return Ok(candidate),
                 NameOwner::Network(_) | NameOwner::Unknown => {
-                    candidate = format!("{base}-{suffix}");
+                    candidate = suffixed_name(base, suffix);
                 }
             }
         }
@@ -1627,5 +1640,28 @@ mod tests {
     fn nothing_to_do_when_every_saved_network_is_live() {
         let saved = vec![net("homelab"), coordinator_net("field")];
         assert!(missing_networks(&saved, |_| true, |_| false).is_empty());
+    }
+
+    /// A suffix must not push a name past the 63-character limit: the candidate
+    /// is looked up by its config file name, which rejects a longer one, so the
+    /// search would fail instead of finding a free name.
+    #[test]
+    fn a_suffixed_name_stays_a_valid_name() {
+        assert_eq!(suffixed_name("gaming", 1), "gaming-1");
+        let longest = "a".repeat(63);
+        for (suffix, want) in [
+            (1, format!("{}-1", "a".repeat(61))),
+            (10, format!("{}-10", "a".repeat(60))),
+        ] {
+            let name = suffixed_name(&longest, suffix);
+            assert_eq!(name, want);
+            assert!(crate::hostname::is_valid_hostname(&name), "{name}");
+        }
+        // A cut that ends on a hyphen drops it rather than doubling it.
+        let hyphen_at_cut = format!("{}-bb", "a".repeat(60));
+        assert_eq!(
+            suffixed_name(&hyphen_at_cut, 1),
+            format!("{}-1", "a".repeat(60))
+        );
     }
 }
