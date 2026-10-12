@@ -39,6 +39,9 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- The macOS Files page asks before replacing an existing file, shows live
+  download progress, and offers Show in Finder for received files.
+
 - The macOS app reuses its VPN session for status updates and commands, avoiding
   memory growth while it stays open.
 
