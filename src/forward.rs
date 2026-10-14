@@ -1034,6 +1034,9 @@ pub fn spawn_peer_reader(
                     }
                 }
             }
+            for _ in 0..reassembly.take_evicted() {
+                stats.record_drop(DropReason::ReassemblyLimit);
+            }
         }
     };
     tokio::spawn(reader.instrument(span))

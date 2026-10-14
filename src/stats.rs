@@ -33,6 +33,8 @@ pub enum DropReason {
     /// An incomplete fragmented packet exceeded its fixed reassembly deadline.
     ReassemblyTimeout,
     /// A peer or the daemon exhausted its bounded fragment reassembly budget.
+    /// The peer's oldest incomplete packet is dropped to make room, or the new
+    /// fragment if the peer has none.
     ReassemblyLimit,
     /// Outbound packet dropped while its destination peer was being dialed on
     /// demand. The small first-packet queue is full, so retaining this newest

@@ -91,6 +91,12 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   picks itself gets the next free suffix, so a second `gaming` joins as
   `gaming-1`.
 
+- Transfers over a link that loses packets no longer stall for seconds at a
+  time. Packets too large for one QUIC datagram travel in pieces, and the
+  receiver keeps up to 64 unfinished ones per peer, each for up to 5 seconds.
+  When lost pieces filled those slots, every later split packet was dropped
+  until they expired. Now the oldest unfinished packet makes room.
+
 ## [0.5.7] - 2026-10-03
 
 ### Added
