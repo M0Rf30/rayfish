@@ -828,7 +828,7 @@ pub(crate) async fn ipc_apply(
             apply::expand_firewall(fw, &net_aliases, &spec.groups, &resolve, &current)?;
         for a in empty_aliases {
             eprintln!(
-                "{}  {net_name}: alias '{a}' has no joined devices yet; its rules are skipped",
+                "{}  {net_name}: alias '{a}' has no joined devices yet; resolves to no hosts",
                 style::faint("note:")
             );
         }

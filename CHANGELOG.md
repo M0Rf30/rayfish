@@ -43,6 +43,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   now turns DNS over TLS off on its own interface, since Magic DNS answers plain
   UDP only; lookups used to time out.
 
+- `ray apply` accepts target exclusions containing aliases with no joined
+  devices. Rules go only to concrete targets, so later user devices receive no
+  grant before reapplying. Peer exclusions still require joined devices.
+
+- The macOS Files page asks before replacing an existing file, shows live
+  download progress, and offers Show in Finder for received files.
+
 - The macOS app reuses its VPN session for status updates and commands, avoiding
   memory growth while it stays open.
 
@@ -81,6 +88,18 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - `ray leave` reaches the network's coordinator even when the connection to it
   had gone idle, as it usually has on a phone. The device no longer stays on the
   roster holding its hostname until someone runs `ray kick`.
+
+- Creating or joining a network no longer overwrites a saved network of the same
+  name that is not active, such as one still waiting for its restore, along with
+  its keys. A `--name` that another network holds is refused, and a name Rayfish
+  picks itself gets the next free suffix, so a second `gaming` joins as
+  `gaming-1`.
+
+- Transfers over a link that loses packets no longer stall for seconds at a
+  time. Packets too large for one QUIC datagram travel in pieces, and the
+  receiver keeps up to 64 unfinished ones per peer, each for up to 5 seconds.
+  When lost pieces filled those slots, every later split packet was dropped
+  until they expired. Now the oldest unfinished packet makes room.
 
 ## [0.5.7] - 2026-10-03
 
