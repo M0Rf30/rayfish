@@ -39,6 +39,10 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Fixed
 
+- `ray apply` accepts target exclusions containing aliases with no joined
+  devices. Rules go only to concrete targets, so later user devices receive no
+  grant before reapplying. Peer exclusions still require joined devices.
+
 - The macOS Files page asks before replacing an existing file, shows live
   download progress, and offers Show in Finder for received files.
 
